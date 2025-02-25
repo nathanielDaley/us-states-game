@@ -27,17 +27,22 @@ state_dict = {}
 for index in range(len(state_names)):
     state_dict[state_names[index]] = (state_x_coordinates[index], state_y_coordinates[index])
 
-game_running = True
-while game_running:
-    states_correct = 0
-    state_guess = screen.textinput(title="Guess the state.", prompt="What's another state's name?").capitalize()
+guessed_states = []
+states_correct = 0
+while states_correct < 50:
+    state_guess = screen.textinput(title=f"{states_correct}/50 States Correct",
+                                   prompt="What's another state's name?").title()
+
+    if state_guess == "Exit":
+        missing_states = []
+        for state in state_names:
+            if not state in guessed_states:
+                missing_states.append(state)
+        pandas.DataFrame(missing_states).to_csv("states_to_learn.csv")
+        break
 
     if state_guess in state_dict:
         state_writer.goto(state_dict[state_guess][0], state_dict[state_guess][1])
         state_writer.write(state_guess, align=TEXT_ALIGN, font=TEXT_FONT)
+        guessed_states.append(state_guess)
         states_correct += 1
-
-    if states_correct == 50:
-        game_running = False
-
-screen.exitonclick()
